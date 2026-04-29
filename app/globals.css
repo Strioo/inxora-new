@@ -166,13 +166,27 @@ h1, h2, h3, h4, .font-serif {
 .layout-grid {
   position: fixed;
   top: 0;
-  left: 100px;
-  right: 100px;
+  left: 16px;
+  right: 16px;
   bottom: 0;
   pointer-events: none;
-  z-index: 50;
+  z-index: 1;
   display: flex;
   justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .layout-grid {
+    left: 48px;
+    right: 48px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout-grid {
+    left: 100px;
+    right: 100px;
+  }
 }
 
 .vertical-line {
@@ -203,10 +217,14 @@ h1, h2, h3, h4, .font-serif {
   z-index: 10;
 }
 
-.section-divider::before {
-  left: calc(100px - 12px);
+/* Mobile & tablet: hide stars */
+.section-divider::before,
+.section-divider::after {
+  display: none;
 }
 
-.section-divider::after {
-  right: calc(100px - 12px);
+/* Desktop only: show stars aligned to vertical lines */
+@media (min-width: 1024px) {
+  .section-divider::before { display: block; left: calc(100px - 12px); }
+  .section-divider::after  { display: block; right: calc(100px - 12px); }
 }

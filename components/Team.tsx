@@ -89,7 +89,7 @@ export default function Team() {
   };
 
   return (
-    <section id="work" className="pt-24">
+    <section id="team" className="pt-24">
       <div className="max-w-[90rem] mx-auto">
         {/* Header */}
         <motion.div
