@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { fadeUp, imageReveal, staggerContainer, VIEWPORT } from "@/lib/animation";
 import { Users, User, Mail, Building2, FileText, Send } from "lucide-react";
 
 export default function Contact() {
@@ -25,25 +27,37 @@ export default function Contact() {
 
   return (
     <section id="contact" className="py-24 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[90rem] mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 icon-pill bg-base-content text-white mb-6">
+        <motion.div
+          className="text-center mb-12"
+          variants={staggerContainer(0.13, 0)}
+          initial="hidden"
+          whileInView="show"
+          viewport={VIEWPORT}
+        >
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 icon-pill bg-base-content text-white mb-6">
             <Users className="w-3.5 h-3.5" />
             <span>Project</span>
-          </div>
+          </motion.div>
 
-          <h2 className="font-serif text-5xl sm:text-6xl font-normal leading-[1.1] text-base-content mb-4">
+          <motion.h2 variants={fadeUp} className="font-serif text-5xl sm:text-6xl font-normal leading-[1.1] text-base-content mb-4">
             Start Your Project
-          </h2>
+          </motion.h2>
 
-          <p className="text-base-content/50 text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
+          <motion.p variants={fadeUp} className="text-base-content/50 text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
             Have an idea to bring to life? Let&apos;s discuss your project and how we can help.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Form card */}
-        <div className="max-w-2xl mx-auto">
+        <motion.div
+          className="max-w-2xl mx-auto"
+          variants={imageReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={VIEWPORT}
+        >
           <div className="bg-white rounded-3xl border border-base-300/50 shadow-xl overflow-hidden">
             {/* Traffic lights */}
             <div className="flex items-center gap-1.5 px-5 py-4 border-b border-gray-100">
@@ -155,7 +169,7 @@ export default function Contact() {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

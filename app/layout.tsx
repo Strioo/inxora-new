@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   title: "Inxora Studio — Clean & Modern Digital Websites",
   description:
     "Inxora helps businesses create modern, high-performing websites that not only look great — but actually convert and grow your brand.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/icons/inxora-logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -28,6 +33,12 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="inxora">
       <body className={`${playfair.variable} ${inter.variable} font-sans antialiased`}>
+        {/* Full-page vertical lines */}
+        <div className="layout-grid">
+          <div className="vertical-line"></div>
+          <div className="vertical-line"></div>
+        </div>
+        
         {children}
       </body>
     </html>

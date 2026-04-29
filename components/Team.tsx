@@ -1,99 +1,157 @@
-import { Users } from "lucide-react";
+"use client";
 
-/* ── Avatar placeholder ── */
-function Avatar({
-  active = false,
-  index,
-}: {
-  active?: boolean;
-  index: number;
-}) {
-  const colors = [
-    "from-slate-400 to-slate-500",
-    "from-zinc-400 to-zinc-500",
-    "from-stone-400 to-stone-500",
-    "from-neutral-400 to-neutral-500",
-    "from-gray-400 to-gray-500",
-    "from-slate-500 to-slate-600",
-  ];
+import { useRef, useState, useEffect } from "react";
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { fadeUp, imageReveal, staggerContainer, VIEWPORT } from "@/lib/animation";
+import { Users, Play, Pause } from "lucide-react";
 
-  const initials = ["AJ", "MK", "RS", "LP", "TN", "DW"];
-
-  if (active) {
-    return (
-      <div className="relative flex-shrink-0">
-        <div className="w-44 h-56 rounded-3xl bg-gradient-to-br from-blue-400 to-blue-600 flex flex-col items-center justify-end p-3 overflow-hidden shadow-lg">
-          {/* Silhouette SVG */}
-          <svg viewBox="0 0 100 120" className="absolute top-4 w-24" fill="white" opacity="0.9">
-            <circle cx="50" cy="30" r="22" />
-            <path d="M10 100 Q10 65 50 65 Q90 65 90 100" />
-          </svg>
-          <button className="relative z-10 w-full bg-base-content text-white text-xs font-medium py-2 rounded-xl">
-            View Portfolio
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex-shrink-0 team-card-inactive">
-      <div
-        className={`w-36 h-52 rounded-3xl bg-gradient-to-br ${colors[index % colors.length]} flex flex-col items-center justify-center overflow-hidden border border-white/20`}
-      >
-        <svg viewBox="0 0 100 120" className="w-20" fill="white" opacity="0.7">
-          <circle cx="50" cy="35" r="20" />
-          <path d="M12 100 Q12 68 50 68 Q88 68 88 100" />
-        </svg>
-        <span className="text-white/80 text-xs mt-2 font-medium">{initials[index]}</span>
-      </div>
-    </div>
-  );
-}
-
-const teamMembers = [
-  { name: "Alex Johnson", role: "Lead Designer", active: true },
-  { name: "Maya Kim", role: "UI Designer" },
-  { name: "Ryan Soto", role: "Frontend Dev" },
-  { name: "Lena Park", role: "UX Researcher" },
-  { name: "Theo Nguyen", role: "Backend Dev" },
-  { name: "Dana White", role: "Brand Strategist" },
-];
+const NAVBAR_H = 72;
 
 export default function Team() {
+  const videoRef    = useRef<HTMLVideoElement>(null);
+  const playingRef  = useRef(false);
+  const [playing, setPlaying] = useState(false);
+
+  /* ── Compute pixel values — use clientWidth to exclude scrollbar ── */
+  const [dims, setDims] = useState({ minH: 300, maxH: 600, minW: 400, maxW: 800 });
+
+  useEffect(() => {
+    const calc = () => {
+      const vw = document.documentElement.clientWidth;
+      const vh = window.innerHeight;
+      const fullW = window.innerWidth;
+      setDims({
+        minH: vw * 0.22,
+        maxH: vh - NAVBAR_H,
+        minW: vw * 0.52,
+        maxW: fullW,
+      });
+    };
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
+
+  /* ── IntersectionObserver autoplay fallback ── */
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && !playingRef.current) {
+          el.play().catch(() => {});
+          playingRef.current = true;
+          setPlaying(true);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  /* ── Scroll-to-fullscreen setup ── */
+  const stickyRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: stickyRef,
+    offset: ["start center", "end center"],
+  });
+
+  const videoWidth   = useTransform(scrollYProgress, [0, 0.7], [dims.minW, dims.maxW]);
+  const videoHeight  = useTransform(scrollYProgress, [0, 0.7], [dims.minH, dims.maxH]);
+  const borderRadius = useTransform(scrollYProgress, [0, 0.7], [24, 0]);
+
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    if (!videoRef.current) return;
+    if (v > 0.05 && !playingRef.current) {
+      videoRef.current.play().catch(() => {});
+      playingRef.current = true;
+      setPlaying(true);
+    } else if (v <= 0.05 && playingRef.current) {
+      videoRef.current.pause();
+      playingRef.current = false;
+      setPlaying(false);
+    }
+  });
+
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (playingRef.current) {
+      videoRef.current.pause();
+      playingRef.current = false;
+      setPlaying(false);
+    } else {
+      videoRef.current.play();
+      playingRef.current = true;
+      setPlaying(true);
+    }
+  };
+
   return (
-    <section id="work" className="py-24 px-4 overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+    <section id="work" className="pt-24">
+      <div className="max-w-[90rem] mx-auto">
         {/* Header */}
-        <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 icon-pill bg-base-content text-white mb-6">
+        <motion.div
+          className="text-center mb-14"
+          variants={staggerContainer(0.13, 0)}
+          initial="hidden"
+          whileInView="show"
+          viewport={VIEWPORT}
+        >
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 icon-pill bg-base-content text-white mb-6">
             <Users className="w-3.5 h-3.5" />
             <span>Team</span>
-          </div>
+          </motion.div>
 
-          <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-normal leading-[1.1] text-base-content mb-5">
+          <motion.h2 variants={fadeUp} className="font-serif text-4xl sm:text-5xl lg:text-6xl font-normal leading-[1.1] text-base-content mb-5">
             Meet the people behind
             <br />
             Inxora Studio
-          </h2>
+          </motion.h2>
 
-          <p className="text-base-content/50 text-base max-w-md mx-auto leading-relaxed">
+          <motion.p variants={fadeUp} className="text-base-content/50 text-base max-w-md mx-auto leading-relaxed">
             A passionate team of designers and developers dedicated to crafting
             exceptional digital experiences.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
+      </div>
 
-        {/* Avatar row — scrollable on mobile */}
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide justify-start lg:justify-center">
-          {teamMembers.map((member, i) => (
-            <Avatar key={member.name} active={member.active} index={i} />
-          ))}
-        </div>
+      {/* ── Scroll-linked video: 300vh scroll room, scale to fullscreen ── */}
+      <div ref={stickyRef} style={{ height: "300vh", marginLeft: "-1rem", marginRight: "-1rem" }}>
+        <div
+          className="sticky flex items-center justify-center"
+          style={{ top: `${NAVBAR_H}px`, height: `calc(100vh - ${NAVBAR_H}px)`, overflow: "hidden" }}
+        >
+          <motion.div
+            style={{
+              width: videoWidth,
+              height: videoHeight,
+              borderRadius,
+              position: "relative",
+            }}
+            className="cursor-pointer group overflow-hidden"
+            onClick={togglePlay}
+          >
+            <video
+              ref={videoRef}
+              src="/video/intro_video.mp4"
+              className="w-full h-full object-cover"
+              loop
+              playsInline
+              onEnded={() => setPlaying(false)}
+            />
 
-        {/* Scroll hint on mobile */}
-        <p className="text-center text-xs text-base-content/30 mt-4 md:hidden">
-          Swipe to see the full team →
-        </p>
+            {/* Pause button — only visible on hover while playing */}
+            {playing && (
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-white/90 shadow-lg">
+                  <Pause className="w-6 h-6 text-base-content" />
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </div>
       </div>
     </section>
   );

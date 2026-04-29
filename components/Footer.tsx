@@ -1,3 +1,7 @@
+"use client";
+import { motion } from "framer-motion";
+import { fadeUp, staggerContainer, VIEWPORT } from "@/lib/animation";
+
 function StarDecor({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -26,21 +30,27 @@ export default function Footer() {
       <StarDecor className="absolute bottom-4 left-4 !text-base-content/25" />
       <StarDecor className="absolute bottom-4 right-4 !text-base-content/25" />
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[90rem] mx-auto">
         {/* Main footer grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-16 mb-12">
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-16 mb-12"
+          variants={staggerContainer(0.1, 0)}
+          initial="hidden"
+          whileInView="show"
+          viewport={VIEWPORT}
+        >
           {/* Brand column */}
-          <div className="sm:col-span-2 lg:col-span-1">
+          <motion.div variants={fadeUp} className="sm:col-span-2 lg:col-span-1">
             <h4 className="font-sans font-bold text-lg text-base-content mb-3">
               Inxora Studio
             </h4>
             <p className="text-base-content/45 text-sm leading-relaxed max-w-xs">
               Raise Funds, Make Decisions, And Move Faster—With Reports Powered By AI.
             </p>
-          </div>
+          </motion.div>
 
           {/* Quick Links */}
-          <div>
+          <motion.div variants={fadeUp}>
             <h5 className="font-sans font-semibold text-sm text-base-content mb-4">
               Quick Links
             </h5>
@@ -56,10 +66,10 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Platform */}
-          <div>
+          <motion.div variants={fadeUp}>
             <h5 className="font-sans font-semibold text-sm text-base-content mb-4">
               Platform
             </h5>
@@ -75,10 +85,10 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Connect */}
-          <div>
+          <motion.div variants={fadeUp}>
             <h5 className="font-sans font-semibold text-sm text-base-content mb-4">
               Connect
             </h5>
@@ -94,8 +104,8 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Divider */}
         <div className="border-t border-base-300/50 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">

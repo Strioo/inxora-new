@@ -1,154 +1,256 @@
-import { ExternalLink } from "lucide-react";
+"use client";
 
-/* ── Mac-style traffic lights ── */
-function TrafficLights() {
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { fadeUp, VIEWPORT } from "@/lib/animation";
+import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+
+type PortfolioItem = { id: number; title: string; desc: string; mainImg: string };
+
+const portfolios: PortfolioItem[] = [
+  {
+    id: 1,
+    title: "Luxe — Premium E-Commerce Platform",
+    desc: "Platform e-commerce modern dengan UX yang crafted dan performa tinggi untuk brand premium.",
+    mainImg: "/images/portfolio-1.png",
+  },
+  {
+    id: 2,
+    title: "Nex Dashboard — Analytics SaaS",
+    desc: "Sistem analitik berbasis cloud dengan antarmuka yang clean dan visualisasi data real-time.",
+    mainImg: "/images/portfolio-2.png",
+  },
+  {
+    id: 3,
+    title: "Studio X — Creative Agency",
+    desc: "Landing page interaktif untuk agensi kreatif yang menonjolkan portofolio visual mereka.",
+    mainImg: "/images/portfolio-3.png",
+  },
+];
+
+/* ── Per-slot styles ── */
+const T = "transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease, box-shadow 0.5s ease";
+
+/* animating=true → mid-flight 3D tilt; false → flat resting state for sides */
+function slotStyle(slot: number, animating: boolean): React.CSSProperties {
+  if (slot === 0) {
+    return {
+      position: "absolute", transition: T,
+      transform: "translateX(0) scale(1.05)",
+      opacity: 1, zIndex: 30,
+      boxShadow: "0 24px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.10)",
+    };
+  }
+  if (slot === -1) {
+    const tilt = animating
+      ? "translateX(-85%) translateZ(-180px) rotateY(24deg) scale(0.46)"
+      : "translateX(-85%) scale(0.46)";
+    return { position: "absolute", transition: T, transform: tilt, opacity: 1, zIndex: 10 };
+  }
+  if (slot === 1) {
+    const tilt = animating
+      ? "translateX(85%) translateZ(-180px) rotateY(-24deg) scale(0.46)"
+      : "translateX(85%) scale(0.46)";
+    return { position: "absolute", transition: T, transform: tilt, opacity: 1, zIndex: 10 };
+  }
+  const tx = slot < 0 ? "-163%" : "163%";
+  return {
+    position: "absolute", transition: T,
+    transform: `translateX(${tx}) scale(0.35)`,
+    opacity: 0, zIndex: 0,
+  };
+}
+
+/* ── Center card: macOS browser mockup with inline caption ── */
+function MacCard({ item }: { item: PortfolioItem }) {
   return (
-    <div className="flex items-center gap-1.5 px-4 py-3 border-b border-gray-100">
-      <span className="w-3 h-3 rounded-full bg-red-400" />
-      <span className="w-3 h-3 rounded-full bg-yellow-400" />
-      <span className="w-3 h-3 rounded-full bg-green-400" />
+    <div className="w-full bg-white rounded-xl overflow-hidden border border-gray-100">
+      <div className="flex items-center gap-1.5 px-4 py-3 bg-white border-b border-gray-100">
+        <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+        <span className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+        <span className="w-3 h-3 rounded-full bg-[#28C840]" />
+      </div>
+      <div className="relative rounded-xl bg-gray-50 overflow-hidden" style={{ height: "300px" }}>
+        <span className="absolute inset-0 flex items-center justify-center text-sm text-gray-300 select-none">
+          Main Graphic (PNG)
+        </span>
+        <img
+          src={item.mainImg}
+          alt={item.title}
+          className="absolute inset-0 w-full h-full object-cover object-top z-10"
+          onError={(e) => { e.currentTarget.style.opacity = "0"; }}
+        />
+        {/* ── Gradient fade into caption ── */}
+        <div
+          className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none"
+          style={{ height: "96px", background: "linear-gradient(to bottom, transparent, #ffffff)" }}
+        />
+      </div>
+      {/* ── Inline caption ── */}
+      <div className="px-6 pb-5 text-center">
+        <h3 className="font-sans font-bold text-xl text-base-content tracking-tight">
+          {item.title}
+        </h3>
+        <p className="text-base-content/50 text-sm mt-1.5 leading-relaxed">
+          {item.desc}
+        </p>
+        <a
+          href="#"
+          className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-base-content mt-3 transition-colors font-medium border-b border-transparent hover:border-black pb-0.5"
+        >
+          View case study <ExternalLink className="w-3.5 h-3.5" />
+        </a>
+      </div>
     </div>
   );
 }
 
-/* ── Placeholder mockup content ── */
-function MockupContent({ variant }: { variant: "main" | "side-left" | "side-right" }) {
-  if (variant === "main") {
-    return (
-      <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black flex flex-col">
-        <div className="flex-1 p-6 flex flex-col gap-4">
-          {/* Nav bar mockup */}
-          <div className="flex justify-between items-center text-gray-400 text-xs pb-2 border-b border-gray-700">
-            <div className="flex gap-4 text-[10px]">
-              {["HOME", "SHOP", "NEW ARRIVALS", "BEST SELLERS", "SALE"].map((i) => (
-                <span key={i}>{i}</span>
-              ))}
-            </div>
-            <span className="bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded">Sign Up</span>
-          </div>
-          {/* Hero text */}
-          <div className="mt-2">
-            <h3 className="font-bold text-3xl text-white leading-tight tracking-tight font-serif">
-              ELEVATE YOUR STYLE.
-              <br />
-              DEFINE YOUR STORY.
-            </h3>
-            <p className="text-gray-400 text-xs mt-2 max-w-[200px]">
-              Discover the latest trends, timeless pieces, and exclusive fashion that speaks you.
-            </p>
-            <button className="mt-3 bg-teal-500 text-white text-xs px-3 py-1.5 rounded">
-              View Collection
-            </button>
-          </div>
-          {/* Brand name */}
-          <div className="mt-auto">
-            <span className="text-5xl font-black text-transparent" style={{
-              WebkitTextStroke: "2px rgba(255,255,255,0.15)",
-            }}>
-              TRENDORA
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (variant === "side-left") {
-    return (
-      <div className="h-full bg-white p-3 flex flex-col gap-2">
-        <div className="text-[10px] font-semibold text-gray-700">Essential Skincare for Every Body</div>
-        <div className="flex gap-1 mt-1">
-          {[1,2,3].map(i => (
-            <div key={i} className="w-8 h-10 bg-gray-100 rounded" />
-          ))}
-        </div>
-        <div className="text-[9px] text-gray-400 mt-1 leading-tight">
-          Nabeaute is a body care brand focused on quality and all-natural care, offering ingredients to care for your skin...
-        </div>
-        <div className="flex gap-2 text-[9px] text-gray-500 mt-auto">
-          <span>105K ⬆</span><span>10M+ 🌟</span><span>4.8</span>
-        </div>
-        <div className="flex gap-1">
-          {[1,2,3,4].map(i => (
-            <div key={i} className="w-7 h-7 bg-amber-50 rounded" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
+/* ── Side cards: framed rounded casing matching reference ── */
+function SideCard({ item }: { item: PortfolioItem }) {
   return (
-    <div className="h-full bg-white p-3 flex flex-col gap-2">
-      <div className="text-[10px] font-semibold text-gray-700">Elevate Your Home with Timeless Furniture</div>
-      <div className="flex gap-1 mt-1">
-        <div className="flex-1 h-12 bg-green-50 rounded flex items-center justify-center text-lg">🛋️</div>
-        <div className="flex-1 h-12 bg-amber-50 rounded" />
-      </div>
-      <div className="text-[9px] text-gray-400 leading-tight">
-        Designing Comfort for Modern Living.
-      </div>
-      <div className="flex gap-3 text-[9px] text-gray-500 mt-auto font-medium">
-        <span>1,200+</span><span>25K+</span><span>99%</span><span>50+</span>
+    <div
+      className="w-full bg-white p-2"
+      style={{
+        borderRadius: "28px",
+        border: "3px solid #E5E2E2",
+      }}
+    >
+      <div
+        className="relative bg-gray-50 overflow-hidden w-full"
+        style={{ height: "340px", borderRadius: "20px" }}
+      >
+        <span className="absolute inset-0 flex items-center justify-center text-sm text-gray-300 select-none">
+          Main Graphic (PNG)
+        </span>
+        <img
+          src={item.mainImg}
+          alt={item.title}
+          className="absolute inset-0 w-full h-full object-cover object-top z-10"
+          onError={(e) => { e.currentTarget.style.opacity = "0"; }}
+        />
       </div>
     </div>
   );
 }
 
 export default function Portfolio() {
+  const [center, setCenter] = useState(0);
+  const [locked, setLocked] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const n = portfolios.length;
+
+  const navigate = (dir: "next" | "prev") => {
+    if (locked) return;
+    setLocked(true);
+    setAnimating(true);
+    setCenter(c => dir === "next" ? (c + 1) % n : (c - 1 + n) % n);
+    setTimeout(() => {
+      setAnimating(false);
+      setLocked(false);
+    }, 520);
+  };
+
+  /* Map each item to a slot relative to center: range [-floor(n/2) … floor(n/2)] */
+  const items = portfolios.map((item, i) => {
+    let slot = (i - center + n) % n;
+    if (slot > n / 2) slot -= n;
+    return { item, slot };
+  });
+
   return (
-    <section id="portfolio" className="py-24 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Main mockup container */}
-        <div className="relative flex items-center justify-center">
-          {/* ── Side-left floating card ── */}
-          <div className="hidden lg:block absolute left-0 z-20 w-[220px] rounded-2xl border border-base-300 bg-white shadow-xl overflow-hidden"
-            style={{ height: "260px", transform: "translateX(30px)" }}>
-            <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-100">
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-            </div>
-            <div className="h-full">
-              <MockupContent variant="side-left" />
-            </div>
-          </div>
+    <section id="portfolio" className="py-24 overflow-hidden relative dot-pattern">
 
-          {/* ── Central main mockup ── */}
-          <div className="relative z-10 w-full max-w-3xl mx-auto lg:mx-16 mockup-browser-custom overflow-hidden">
-            <TrafficLights />
-            <div style={{ height: "420px" }}>
-              <MockupContent variant="main" />
-            </div>
-          </div>
+      {/* ── Horizontal center line ── */}
+      <div
+        className="absolute left-0 right-0 pointer-events-none z-100"
+        style={{ top: "50%", height: "2px", backgroundColor: "rgba(0,0,0,0.08)" }}
+      />
 
-          {/* ── Side-right floating card ── */}
-          <div className="hidden lg:block absolute right-0 z-20 w-[220px] rounded-2xl border border-base-300 bg-white shadow-xl overflow-hidden"
-            style={{ height: "220px", transform: "translateX(-30px)" }}>
-            <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-100">
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+      {/* ── Left arrow — aligned to left vertical line ── */}
+      <button
+        onClick={() => navigate("prev")}
+        aria-label="Previous"
+        className="absolute z-[55] p-3 rounded-full bg-white border border-gray-200 shadow-lg hover:bg-gray-50 transition-all duration-200 active:scale-95"
+        style={{ left: "100px", top: "50%", transform: "translate(-50%, -50%)" }}
+      >
+        <ChevronLeft className="w-5 h-5 text-gray-700" />
+      </button>
+
+      {/* ── Right arrow — aligned to right vertical line ── */}
+      <button
+        onClick={() => navigate("next")}
+        aria-label="Next"
+        className="absolute z-[55] p-3 rounded-full bg-white border border-gray-200 shadow-lg hover:bg-gray-50 transition-all duration-200 active:scale-95"
+        style={{ right: "100px", top: "50%", transform: "translate(50%, -50%)" }}
+      >
+        <ChevronRight className="w-5 h-5 text-gray-700" />
+      </button>
+
+      <motion.div
+        className="relative max-w-[90rem] mx-auto px-6"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="show"
+        viewport={VIEWPORT}
+      >
+
+        {/* ── 3D coverflow track ── */}
+        <div
+          className="relative flex items-center justify-center"
+          style={{ perspective: "1200px", perspectiveOrigin: "50% 50%", height: "820px" }}
+        >
+          {/* ── Background rect behind center card ── */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              width: "870px",
+              height: "723px",
+              backgroundColor: "#F8F8F8",
+              borderRadius: "32px",
+              zIndex: 1,
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+          {/* ── Outer border line (inset x:68 y:48 from bg rect) ── */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              width: `${870 + 68 * 2}px`,
+              height: `${723 + 48 * 2}px`,
+              border: "1.5px solid #E5E2E2",
+              borderRadius: "40px",
+              zIndex: 1,
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+          {items.map(({ item, slot }) => (
+            <div
+              key={item.id}
+              className="w-full max-w-xl rounded-xl"
+              style={{ ...slotStyle(slot, animating), transformStyle: "preserve-3d" }}
+            >
+              {slot === 0 ? <MacCard item={item} /> : <SideCard item={item} />}
             </div>
-            <div className="h-full">
-              <MockupContent variant="side-right" />
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Caption */}
-        <div className="text-center mt-8">
-          <h3 className="font-sans font-semibold text-xl text-base-content">
-            Luxe — Premium E-Commerce Platform
-          </h3>
-          <p className="text-base-content/50 text-sm mt-1 max-w-md mx-auto">
-            Platform e-commerce modern dengan UX yang crafted dan performa tinggi untuk brand premium.
-          </p>
-          <a
-            href="#"
-            className="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-base-content mt-3 transition-colors"
-          >
-            View case study <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+        {/* ── Dot indicators ── */}
+        <div className="flex justify-center gap-2 mt-6 relative z-40">
+          {portfolios.map((_, i) => (
+            <span
+              key={i}
+              className={`rounded-full transition-all duration-300 ${
+                i === center ? "w-5 h-2 bg-base-content" : "w-2 h-2 bg-base-content/20"
+              }`}
+            />
+          ))}
         </div>
-      </div>
+
+      </motion.div>
     </section>
   );
 }
