@@ -32,11 +32,18 @@ export default function Team() {
     return () => window.removeEventListener("resize", calc);
   }, []);
 
-  /* ── IntersectionObserver autoplay fallback ── */
-  useEffect(() => {
-    const el = videoRef.current;
+  /* ── IntersectionObserver autoplay — ref callback ensures el is always available ── */
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const setVideoRef = (el: HTMLVideoElement | null) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
     if (!el) return;
-    const observer = new IntersectionObserver(
+    (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = el;
+
+    observerRef.current = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && !playingRef.current) {
           el.play().catch(() => {});
@@ -46,9 +53,8 @@ export default function Team() {
       },
       { threshold: 0.5 }
     );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+    observerRef.current.observe(el);
+  };
 
   /* ── Scroll-to-fullscreen setup ── */
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -134,10 +140,11 @@ export default function Team() {
             onClick={togglePlay}
           >
             <video
-              ref={videoRef}
+              ref={setVideoRef}
               src="/video/intro_video.mp4"
               className="w-full h-full object-cover"
               loop
+              muted
               playsInline
               onEnded={() => setPlaying(false)}
             />
